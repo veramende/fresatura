@@ -65,6 +65,8 @@ int main()
 			max_rif = 0; //riciclo max_rif come flag	
 			switch (i1)
 			{
+				case 1: //diametro fresa
+					calcola_cutspeed(param1);
 				case 2: //RPM
 					calcola_cutspeed(param1);
 					break;
@@ -95,10 +97,10 @@ int main()
 	return 0; 
 }
 
-void calcola_truciolo(float *ct_param){ ct_param[5] = (ct_param[4] * 1000) / (ct_param[2] * ct_param[0]);}
 void calcola_RPM(float *cr_param){ cr_param[2] = (cr_param[3] * 1000) / (PI_GRECO * cr_param[1]);}
 void calcola_cutspeed(float *cc_param){cc_param[3] = cc_param[2] * PI_GRECO * cc_param[1] * 0.001;}
 void calcola_avanzamento(float *ca_param){ca_param[4] = ca_param[5] * ca_param[2] * ca_param[0] * 0.001;}
+void calcola_truciolo(float *ct_param){ ct_param[5] = (ct_param[4] * 1000) / (ct_param[2] * ct_param[0]);}
 
 void refresh_schermata(float *rs_param)
 {
