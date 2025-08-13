@@ -78,7 +78,7 @@ int main()
 		
 		val_appoggio = input_val(MAX_CHAR); //input campo menu
 		if (val_appoggio.numero > max_rif) 
-			val_appoggio.numero = max_rif; //se sforo il valore massimo consentito
+			val_appoggio.flag = input_non_valido;
 		
 		if (val_appoggio.flag > input_vuoto){
 			param1[i1] = val_appoggio.numero;
@@ -104,7 +104,7 @@ int main()
 					i1 = INIZIO_ARRAY;
 			}
 		}
-	} while (val_appoggio.flag != quit); //FINE DO - WHILE
+	} while (val_appoggio.flag != quit);
 	
 	return 0; 
 }

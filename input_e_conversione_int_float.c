@@ -15,12 +15,12 @@ struct inserimento input_val(int max_len)
 	dato_inserito.numero = 0;
 	i1 = INIZIO_ARRAY;
 	
-	while (dato_inserito.flag == val_default) { //primo array per rappresentare parte intera
+	while (dato_inserito.flag == val_default) {
 		appoggio1 = getchar();
-		if ((appoggio1 >= '0') && (appoggio1 <= '9')) { //se numerico
+		if ((appoggio1 >= '0') && (appoggio1 <= '9')) {
 			comando1[i1] = appoggio1;
 			i1++;
-			if (i1 > (max_len)) //se troppi caratteri
+			if (i1 > (max_len))
 				dato_inserito.flag = input_non_valido; 
 		} else {
 			switch (appoggio1){
@@ -37,12 +37,12 @@ struct inserimento input_val(int max_len)
 				break;
 			case '.':
 			case ',':
-				if (pos_sep == VALORE_IMPOSSIBILE)	//se il valore è ancora inizializzato
-					pos_sep = i1; 					//salvo posizione del separatore
+				if (pos_sep == VALORE_IMPOSSIBILE)
+					pos_sep = i1;
 				else
-					dato_inserito.flag = input_non_valido;	//se la posizione era gia salvata ci sono troppi separatori
+					dato_inserito.flag = input_non_valido;
 				break;
-			default: //se nessuno dei precedenti vuol dire che è un carattere non consentito
+			default:
 				dato_inserito.flag = input_non_valido;
 				break;
 			}
@@ -50,13 +50,13 @@ struct inserimento input_val(int max_len)
 	}
 	if (dato_inserito.flag < input_vuoto) {
 		while ((appoggio1 != '\n') && (appoggio1 != EOF)) 
-			appoggio1 = getchar(); //se non ho rilevato la fine del buffer lo vado a svuotare
+			appoggio1 = getchar(); //svuota stdin
 	}
 	
 	if (dato_inserito.flag == input_corretto) {
 		iv_len = i1;
-		if (pos_sep == VALORE_IMPOSSIBILE)	//se non è stata inserita la virgola
-			pos_sep = iv_len;				//lo tratto come un intero
+		if (pos_sep == VALORE_IMPOSSIBILE)
+			pos_sep = iv_len;
 		dato_inserito.numero = conv_ascii_num(comando1,iv_len,pos_sep);
 	}
 	return dato_inserito;
@@ -71,7 +71,7 @@ float conv_ascii_num(int *stringa1, int len1, int pos_sep) //per le conversioni 
 	for(i1=0;i1<pos_sep;i1++) coefficiente = coefficiente * 10;
 	
 	for(i1=0;i1<len1;i1++) {
-		if ((stringa1[i1] != '.') && (stringa1[i1] != ',')) { //chiaramente escludo la virgola
+		if ((stringa1[i1] != '.') && (stringa1[i1] != ',')) {
 			totale1 += (float)(stringa1[i1]-'0')*coefficiente;
 			coefficiente = coefficiente / 10;
 		}
