@@ -1,114 +1,121 @@
 #include <stdio.h>
 
-#define MAX_CHAR 5
-#define NUM_OPZIONI 6
+#define MAX_CHAR 5 //lunghezza massima campi input
+#define NUM_OPZIONI 6 //numero di voci a menu
 #define PI_GRECO 3.14
+#define INIZIO_ARRAY 0
+//indici relativi ai campi del menu
+#define IND_NTAGLIENTI 0 //campo 0 - prima voce
+#define IND_DIAMETRO 1
+#define IND_RPM 2
+#define IND_CUTSPEED 3
+#define IND_FEEDSPEED 4
+#define IND_SPESSORET 5
+//malori massimi per ogni campo
+#define MAX_NTAGLIENTI 6
+#define MAX_DIAMETRO 12
+#define MAX_RPM 60000
+#define MAX_CUTSPEED 999
+#define MAX_FEEDSPEED 20
+#define MAX_SPESSORE 2
 
-#include "header_funz.h"
-#include "input_e_conversione_int_float.c"
+#include "header_conversione.h"
+
+void refresh_schermata(float *rs_param);
+
+static inline void calcola_RPM(float *cr_param) {
+	cr_param[IND_RPM] = (cr_param[IND_CUTSPEED] * 1000) / (PI_GRECO * cr_param[IND_DIAMETRO]);
+}
+static inline void calcola_cutspeed(float *cc_param) {
+	cc_param[IND_CUTSPEED] = cc_param[IND_RPM] * PI_GRECO * cc_param[IND_DIAMETRO] * 0.001;
+}
+static inline void calcola_avanzamento(float *ca_param) {
+	ca_param[IND_FEEDSPEED] = ca_param[IND_SPESSORET] * ca_param[IND_RPM] * ca_param[IND_NTAGLIENTI] * 0.001;
+}
+static inline void calcola_truciolo(float *ct_param) {
+	ct_param[IND_SPESSORET] = (ct_param[IND_FEEDSPEED] * 1000) / (ct_param[IND_RPM] * ct_param[IND_NTAGLIENTI]);
+}
 
 int main()
 {	
-	float param1[NUM_OPZIONI] = {1,4,15000,0,4,0};	//valori iniziali	
-	//0 - num taglienti
-	//1 - diametro
-	//2 - RPM
-	//3 - velocità taglio
-	//3 - avanzamento
-	//5 - spessore truciolo
-
+	float param1[NUM_OPZIONI] = {1,4,15000,0,4,0};	//valori iniziali
+	struct inserimento val_appoggio;
 	int max_rif, i1;
-	float float_appoggio;
 	
-	calcola_cutspeed(param1);	//valori iniziali
-	calcola_truciolo(param1);		//valori iniziali
+	calcola_cutspeed(param1);	//inizializzazioni
+	calcola_truciolo(param1);
+	i1 = INIZIO_ARRAY;
 	
-	i1 = 0;
-	while (i1 >= 0) 
-	{
+	do{
 		refresh_schermata(param1);
 		printf("inserisci ");
-		switch (i1)
-		{
-			case 0:
-				printf("numero taglienti: ");
-				max_rif = 6;
-				break;
-			case 1:
-				printf("diametro fresa: ");
-				max_rif = 12;
-				break;
-			case 2:
-				printf("RPM: ");
-				max_rif = 60000;
-				break;
-			case 3:
-				printf("velocita' di taglio (rotazione): ");
-				max_rif = 999;
-				break;
-			case 4:
-				printf("velocita' di avanzamento: ");
-				max_rif = 20;
-				break;
-			case 5:
-				printf("spessore truciolo: ");
-				max_rif = 2;
-				break;
+		switch (i1) {
+		case IND_NTAGLIENTI:
+			printf("numero taglienti: ");
+			max_rif = MAX_NTAGLIENTI;
+			break;
+		case IND_DIAMETRO:
+			printf("diametro fresa: ");
+			max_rif = MAX_DIAMETRO;
+			break;
+		case IND_RPM:
+			printf("RPM: ");
+			max_rif = MAX_RPM;
+			break;
+		case IND_CUTSPEED:
+			printf("velocita' di taglio (rotazione): ");
+			max_rif = MAX_CUTSPEED;
+			break;
+		case IND_FEEDSPEED:
+			printf("velocita' di avanzamento: ");
+			max_rif = MAX_FEEDSPEED;
+			break;
+		case IND_SPESSORET:
+			printf("spessore truciolo: ");
+			max_rif = MAX_SPESSORE;
+			break;
 		}
 		
-		float_appoggio = input_val(MAX_CHAR);
-		if (float_appoggio > max_rif) float_appoggio = max_rif;
+		val_appoggio = input_val(MAX_CHAR); //input campo menu
+		if (val_appoggio.numero > max_rif) 
+			val_appoggio.numero = max_rif; //se sforo il valore massimo consentito
 		
-		if (float_appoggio > 0) 
-		{
-			param1[i1] = float_appoggio;
-			max_rif = 0; //riciclo max_rif come flag	
-			switch (i1)
-			{
-				case 1: //diametro fresa
-					calcola_cutspeed(param1);
-				case 2: //RPM
-					calcola_cutspeed(param1);
-					break;
-				case 3: //velocità di taglio
-					calcola_RPM(param1);
-					break;
-				case 5: //spessore truciolo
-					calcola_avanzamento(param1);
-					break;
+		if (val_appoggio.flag > input_vuoto){
+			param1[i1] = val_appoggio.numero;
+			switch (i1) {
+			case IND_DIAMETRO:
+				calcola_cutspeed(param1);
+			case IND_RPM:
+				calcola_cutspeed(param1);
+				break;
+			case IND_CUTSPEED:
+				calcola_RPM(param1);
+				break;
+			case IND_SPESSORET:
+				calcola_avanzamento(param1);
+				break;
 			}
 			calcola_truciolo(param1);
-		}
-		else
-		{
-			switch ((int)float_appoggio)
-			{
-				case 0: //scorrere voce
-					if (i1 < NUM_OPZIONI - 1) i1++;
-					else i1 = 0;
-					break;
-				case -1:
-					i1 = (int)float_appoggio; //quit
-					break;
-
+		} else {
+			if (val_appoggio.flag == input_vuoto) {
+				if (i1 < NUM_OPZIONI - 1)
+					i1++;
+				else 
+					i1 = INIZIO_ARRAY;
 			}
 		}
-	}
+	} while (val_appoggio.flag != quit); //FINE DO - WHILE
+	
 	return 0; 
 }
-
-void calcola_RPM(float *cr_param){ cr_param[2] = (cr_param[3] * 1000) / (PI_GRECO * cr_param[1]);}
-void calcola_cutspeed(float *cc_param){cc_param[3] = cc_param[2] * PI_GRECO * cc_param[1] * 0.001;}
-void calcola_avanzamento(float *ca_param){ca_param[4] = ca_param[5] * ca_param[2] * ca_param[0] * 0.001;}
-void calcola_truciolo(float *ct_param){ ct_param[5] = (ct_param[4] * 1000) / (ct_param[2] * ct_param[0]);}
 
 void refresh_schermata(float *rs_param)
 {
 	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); //clear screen
-	printf("\n	numero di taglienti:		%1.0f\n",*rs_param);
-	printf("\n	diametro fresa:			%1.1f mm\n",*(rs_param + 1));
-	printf("\n		RPM:			%5.0f\n",rs_param[2]);
-	printf("\n	 velocita' taglio:		%3.1f m/min\n",rs_param[3]);
-	printf("\nvelocita' avanzamento:			%2.1f m/min\n",rs_param[4]);
-	printf("\n	spessore truciolo:		%1.2f\n\n\n",rs_param[5]);
+	printf("\n	numero di taglienti:		%1.0f\n",rs_param[IND_NTAGLIENTI]);
+	printf("\n	diametro fresa:			%1.1f mm\n",rs_param[IND_DIAMETRO]);
+	printf("\n		RPM:			%5.0f\n",rs_param[IND_RPM]);
+	printf("\n	 velocita' taglio:		%3.1f m/min\n",rs_param[IND_CUTSPEED]);
+	printf("\nvelocita' avanzamento:			%2.1f m/min\n",rs_param[IND_FEEDSPEED]);
+	printf("\n	spessore truciolo:		%1.2f\n\n\n",rs_param[IND_SPESSORET]);
 }
