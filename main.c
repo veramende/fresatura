@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #define MAX_CHAR 5 //lunghezza massima campi input
-#define NUM_OPZIONI 6 //numero di voci a menu
+#define NUM_OPZIONI 7 //numero di voci a menu
 #define PI_GRECO 3.14
 #define INIZIO_ARRAY 0
 //indici relativi ai campi del menu
@@ -11,6 +11,7 @@
 #define IND_CUTSPEED 3
 #define IND_FEEDSPEED 4
 #define IND_SPESSORET 5
+#define IND_AREA 6
 //malori massimi per ogni campo
 #define MAX_NTAGLIENTI 6
 #define MAX_DIAMETRO 12
@@ -18,6 +19,7 @@
 #define MAX_CUTSPEED 999
 #define MAX_FEEDSPEED 20
 #define MAX_SPESSORE 2
+#define MAX_AREA 2
 
 #include "header_conversione.h"
 
@@ -35,6 +37,9 @@ static inline void calcola_avanzamento(float *ca_param) {
 static inline void calcola_truciolo(float *ct_param) {
 	ct_param[IND_SPESSORET] = (ct_param[IND_FEEDSPEED] * 1000) / (ct_param[IND_RPM] * ct_param[IND_NTAGLIENTI]);
 }
+static inline void calcola_area(float *ct_param) {
+	ct_param[IND_AREA] = ct_param[IND_SPESSORET] * ct_param[IND_DIAMETRO];
+}
 
 int main()
 {	
@@ -44,6 +49,7 @@ int main()
 	
 	calcola_cutspeed(param1);	//inizializzazioni
 	calcola_truciolo(param1);
+	calcola_area(param1);
 	i1 = INIZIO_ARRAY;
 	
 	do{
@@ -74,6 +80,10 @@ int main()
 			printf("spessore truciolo: ");
 			max_rif = MAX_SPESSORE;
 			break;
+		case IND_AREA:
+			printf("spessore truciolo: ");
+			max_rif = MAX_AREA;
+			break;
 		}
 		
 		val_appoggio = input_val(MAX_CHAR); //input campo menu
@@ -85,6 +95,7 @@ int main()
 			switch (i1) {
 			case IND_DIAMETRO:
 				calcola_cutspeed(param1);
+				break;
 			case IND_RPM:
 				calcola_cutspeed(param1);
 				break;
@@ -94,8 +105,11 @@ int main()
 			case IND_SPESSORET:
 				calcola_avanzamento(param1);
 				break;
+			default:
+				break;
 			}
 			calcola_truciolo(param1);
+			calcola_area(param1);
 		} else {
 			if (val_appoggio.flag == input_vuoto) {
 				if (i1 < NUM_OPZIONI - 1)
@@ -112,10 +126,12 @@ int main()
 void refresh_schermata(float *rs_param)
 {
 	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); //clear screen
-	printf("\n	numero di taglienti:		%1.0f\n",rs_param[IND_NTAGLIENTI]);
-	printf("\n	diametro fresa:			%1.1f mm\n",rs_param[IND_DIAMETRO]);
-	printf("\n		RPM:			%5.0f\n",rs_param[IND_RPM]);
-	printf("\n	 velocita' taglio:		%3.1f m/min\n",rs_param[IND_CUTSPEED]);
-	printf("\nvelocita' avanzamento:			%2.1f m/min\n",rs_param[IND_FEEDSPEED]);
-	printf("\n	spessore truciolo:		%1.2f\n\n\n",rs_param[IND_SPESSORET]);
+	printf("numero di taglienti:         %1.0f\n",rs_param[IND_NTAGLIENTI]);
+	printf("diametro fresa:              %1.1f mm\n",rs_param[IND_DIAMETRO]);
+	printf("RPM:                         %5.0f\n",rs_param[IND_RPM]);
+	printf("velocita' taglio:            %3.1f m/min\n",rs_param[IND_CUTSPEED]);
+	printf("velocita' avanzamento:       %2.1f m/min\n\n",rs_param[IND_FEEDSPEED]);
+	printf("avanzamento per giro:        %1.2f mm\n",rs_param[IND_SPESSORET]);
+	printf("superficie asportata x giro: %1.2f mm^2\n",rs_param[IND_AREA]);
+	printf("\n\n");
 }
