@@ -1,22 +1,19 @@
 #include <stdio.h>
 #include<string.h>
-
+//********************************* costanti ************************
 #define MAX_CHAR 5 //lunghezza massima campi input
 #define NUM_OPZIONI 6 //numero di voci a menu
 #define PI_GRECO 3.14
 #define INIZIO_ARRAY 0
-//indici relativi ai campi del menu
-#define IND_NTAGLIENTI 0 //campo 0 - prima voce
+#define IND_NTAGLIENTI 0	//indici relativi ai campi del menu
 #define IND_DIAMETRO 1
 #define IND_RPM 2
 #define IND_CUTSPEED 3
 #define IND_FEEDSPEED 4		//avanzamento in m/min (velocità)
 #define IND_FEEDRATE 5		//avanzamento in mm/giro
-
+//**************** funzioni e tipi **********************************
 #include "header_conversione.h"
-
 void refresh_schermata(float *rs_param);
-
 static inline void calcola_RPM(float *cr_param) {
 	cr_param[IND_RPM] = (cr_param[IND_CUTSPEED] * 1000) / (PI_GRECO * cr_param[IND_DIAMETRO]);
 }
@@ -31,13 +28,13 @@ static inline void calcola_feedrate(float *ct_param) {
 }
 
 int main()
-{	
-	float param1[NUM_OPZIONI] = {1,4,15000,0,4,0};	//valori iniziali
+{
+	float param1[NUM_OPZIONI] = {1,4,15000,0,4,0};	//array contenente i parametri di fresatura (inizializzato)
 	char dicitura_input [NUM_OPZIONI][30];
 	struct inserimento val_appoggio;
 	int i1;
-	
-	calcola_cutspeed(param1);	//inizializzazioni
+	//********************************* inizializzazioni *************************************
+	calcola_cutspeed(param1);
 	calcola_feedrate(param1);
 	strcpy(dicitura_input[IND_NTAGLIENTI],	"n. taglienti: ");
 	strcpy(dicitura_input[IND_DIAMETRO],	"diametro (mm): ");
@@ -45,9 +42,8 @@ int main()
 	strcpy(dicitura_input[IND_CUTSPEED],	"velocita rotazione (m/min): ");
 	strcpy(dicitura_input[IND_FEEDSPEED],	"velocita avanz (m/min): ");
 	strcpy(dicitura_input[IND_FEEDRATE],	"avanzamento per giro: ");
-	
 	i1 = INIZIO_ARRAY;
-	
+	//******************************** codice ***********************************************
 	do{
 		refresh_schermata(param1);
 		printf("%s",dicitura_input[i1]);
@@ -85,8 +81,7 @@ int main()
 				i1 = INIZIO_ARRAY;
 		}
 	} while (val_appoggio.flag != quit);
-	
-	return 0; 
+	return 0; //****************************** fine *************************************************
 }
 
 void refresh_schermata(float *rs_param)
