@@ -83,26 +83,28 @@ int main()
 
 void refresh_schermata(float *rs_param, const int rs_cursore)
 {
-	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); //clear screen
+	char rs_video[NUM_OPZIONI][60],rs_appoggio[30];
+	int i1;
+	
 	if (rs_param[IND_DIAMETRO] > 0) {
-		printf("       diametro fresa: %1.1f mm",rs_param[IND_DIAMETRO]);
-		printf("\n                  RPM: %5.0f (%3.1f m/min)",rs_param[IND_RPM], calcola_cutspeed(rs_param));
-	}else{
-		printf("\n                  RPM: %5.0f",rs_param[IND_RPM]);
+		strcpy(rs_video[IND_DIAMETRO],	"        diametro fresa: %1.1f mm");
+		strcpy(rs_video[IND_RPM],		"                  RPM: %5.0f (");
+		sprintf(rs_appoggio,"%3.1f m/min)", calcola_cutspeed(rs_param));
+		strcat(rs_video[IND_RPM], rs_appoggio);
+	} else {
+		strcpy(rs_video[IND_DIAMETRO], "");
+		strcpy(rs_video[IND_RPM],		"                  RPM: %5.0f");
 	}
-	if (rs_cursore == IND_RPM)
-		printf(" *");
-	printf("\nvelocita' avanzamento: %2.1f m/min",rs_param[IND_FEEDSPEED]);
-	if (rs_cursore == IND_FEEDSPEED)
-		printf(" *");
-	printf("\n\navanzamento per giro: %1.2f mm",rs_param[IND_FEEDRATE]);
-	if (rs_cursore == IND_FEEDRATE)
-		printf(" *");
-	printf("\n\n\n");
+	strcpy(rs_video[IND_FEEDSPEED],		"velocita' avanzamento: %2.1f m/min");
+	strcpy(rs_video[IND_FEEDRATE],		"avanzamento per giro: %1.2f mm");
+	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); //clear screen
+	
+	for (i1=0; i1 < NUM_OPZIONI; i1++) {
+		printf(rs_video[i1], rs_param[i1]);
+		if (i1 == rs_cursore)
+			printf(" <--");
+		printf("\n");
+	}
+	printf("\n\n");
 }	
 
-//strcpy(rs_video[IND_DIAMETRO],  "        diametro fresa: %1.1f mm");
-//strcpy(rs_video[IND_RPM],       "                  RPM: %5.0f (%3.1f m/min)");
-//strcpy(rs_video[IND_RPM],       "                  RPM: %5.0f");
-//strcpy(rs_video[IND_FEEDSPEED], "velocita' avanzamento: %2.1f m/min");
-//strcpy(rs_video[IND_FEEDRATE],  "avanzamento per giro: %1.2f mm");
