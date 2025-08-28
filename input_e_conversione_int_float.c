@@ -2,15 +2,17 @@
 #include "header_conversione.h"
 
 #define INIZIO_ARRAY 0
-#define VALORE_IMPOSSIBILE -1
+#define VALORE_INZIALIZZATO -1
 
 struct inserimento input_val(int max_len)
 {
 	int i1, appoggio1, comando1[max_len], iv_len, pos_sep;
 	struct inserimento dato_inserito;
 	
+	int iterazioni = 0;
+	
 	//inizializzazioni
-	pos_sep = VALORE_IMPOSSIBILE;
+	pos_sep = VALORE_INZIALIZZATO;
 	dato_inserito.flag = val_default;
 	dato_inserito.numero = 0;
 	i1 = INIZIO_ARRAY;
@@ -23,39 +25,30 @@ struct inserimento input_val(int max_len)
 			if (i1 > (max_len))
 				dato_inserito.flag = input_non_valido; 
 		} else {
-			switch (appoggio1){
-			case '\n':
-			case EOF:
-				if (i1 == INIZIO_ARRAY)
+			if (((appoggio1 == 'q') || (appoggio1 == 'Q')) && (i1 == 0)) {
+				dato_inserito.flag = quit;
+			} else if (((appoggio1 == 'd') || (appoggio1 == 'D')) && (i1 == 0)) {
+				dato_inserito.flag = inserire_diametro;
+			}else if (((appoggio1 == '.') || (appoggio1 == ',')) && (pos_sep == VALORE_INZIALIZZATO)) {
+				pos_sep = i1;
+			}else if ((appoggio1 == '\n') || (appoggio1 == EOF)) {
+				if (i1 == 0) 
 					dato_inserito.flag = input_vuoto;
 				else
 					dato_inserito.flag = input_corretto;
-				break;
-			case 'q':
-			case 'Q':
-				dato_inserito.flag = quit;
-				break;
-			case '.':
-			case ',':
-				if (pos_sep == VALORE_IMPOSSIBILE)
-					pos_sep = i1;
-				else
-					dato_inserito.flag = input_non_valido;
-				break;
-			default:
+			} else {
 				dato_inserito.flag = input_non_valido;
-				break;
 			}
 		}
 	}
-	if (dato_inserito.flag < input_vuoto) {
+	if ((dato_inserito.flag != input_corretto) && (dato_inserito.flag != input_vuoto)) {
 		while ((appoggio1 != '\n') && (appoggio1 != EOF)) 
 			appoggio1 = getchar(); //svuota stdin
 	}
 	
 	if (dato_inserito.flag == input_corretto) {
 		iv_len = i1;
-		if (pos_sep == VALORE_IMPOSSIBILE)
+		if (pos_sep == VALORE_INZIALIZZATO)
 			pos_sep = iv_len;
 		dato_inserito.numero = conv_ascii_num(comando1,iv_len,pos_sep);
 	}

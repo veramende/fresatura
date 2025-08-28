@@ -1,9 +1,10 @@
 enum valori_flag {
-	input_non_valido = -2, 
+	input_non_valido = -2,
 	quit, 
 	input_vuoto, 
 	val_default, 
-	input_corretto
+	input_corretto,
+	inserire_diametro
 };
 
 struct inserimento {
