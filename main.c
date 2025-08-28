@@ -20,7 +20,7 @@ static inline void calcola_feedrate(float *ct_param) {
 	ct_param[IND_FEEDRATE] = (ct_param[IND_FEEDSPEED] * 1000) / ct_param[IND_RPM];
 }
 
-void refresh_schermata(float *rs_param);
+void refresh_schermata(float *rs_param, const int rs_cursore);
 static inline float calcola_cutspeed(float *cc_param) {
 	return (cc_param[IND_RPM] * PI_GRECO * cc_param[IND_DIAMETRO] * 0.001);
 }
@@ -41,7 +41,7 @@ int main()
 	i1 = IND_RPM;
 	//******************************** codice ***********************************************
 	do{
-		refresh_schermata(param1);
+		refresh_schermata(param1, i1);
 		printf("(q - quit, d - diametro fresa, i - impegno in larghezza %%)\ninserire %s: ",dicitura_input[i1]);
 		val_appoggio = input_val(MAX_CHAR);
 		switch (val_appoggio.flag) {
@@ -68,7 +68,7 @@ int main()
 			break;
 		case inserire_diametro:
 			do{
-				refresh_schermata(param1);
+				printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); //clear screen
 				printf("inserire diametro (q - quit): ");
 				val_appoggio = input_val(1);
 			} while ((val_appoggio.flag != input_corretto) && (val_appoggio.flag != quit));
@@ -81,16 +81,28 @@ int main()
 	return 0; //****************************** fine *************************************************
 }
 
-void refresh_schermata(float *rs_param)
+void refresh_schermata(float *rs_param, const int rs_cursore)
 {
 	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); //clear screen
 	if (rs_param[IND_DIAMETRO] > 0) {
-		printf("       diametro fresa: %1.1f mm\n",rs_param[IND_DIAMETRO]);
-		printf("                  RPM: %5.0f (%3.1f m/min)\n",rs_param[IND_RPM], calcola_cutspeed(rs_param));
+		printf("       diametro fresa: %1.1f mm",rs_param[IND_DIAMETRO]);
+		printf("\n                  RPM: %5.0f (%3.1f m/min)",rs_param[IND_RPM], calcola_cutspeed(rs_param));
 	}else{
-		printf("                  RPM: %5.0f\n",rs_param[IND_RPM]);
+		printf("\n                  RPM: %5.0f",rs_param[IND_RPM]);
 	}
-	printf("velocita' avanzamento: %2.1f m/min\n\n",rs_param[IND_FEEDSPEED]);
-	printf(" avanzamento per giro: %1.2f mm\n",rs_param[IND_FEEDRATE]);
-	printf("\n\n");
+	if (rs_cursore == IND_RPM)
+		printf(" *");
+	printf("\nvelocita' avanzamento: %2.1f m/min",rs_param[IND_FEEDSPEED]);
+	if (rs_cursore == IND_FEEDSPEED)
+		printf(" *");
+	printf("\n\navanzamento per giro: %1.2f mm",rs_param[IND_FEEDRATE]);
+	if (rs_cursore == IND_FEEDRATE)
+		printf(" *");
+	printf("\n\n\n");
 }	
+
+//strcpy(rs_video[IND_DIAMETRO],  "        diametro fresa: %1.1f mm");
+//strcpy(rs_video[IND_RPM],       "                  RPM: %5.0f (%3.1f m/min)");
+//strcpy(rs_video[IND_RPM],       "                  RPM: %5.0f");
+//strcpy(rs_video[IND_FEEDSPEED], "velocita' avanzamento: %2.1f m/min");
+//strcpy(rs_video[IND_FEEDRATE],  "avanzamento per giro: %1.2f mm");
