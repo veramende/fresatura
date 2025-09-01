@@ -29,6 +29,8 @@ struct inserimento input_val(int max_len)
 				dato_inserito.flag = quit;
 			} else if (((appoggio1 == 'd') || (appoggio1 == 'D')) && (i1 == 0)) {
 				dato_inserito.flag = inserire_diametro;
+			} else if (((appoggio1 == 'i') || (appoggio1 == 'I')) && (i1 == 0)) {
+				dato_inserito.flag = inserire_impegno_in_larghezza;
 			}else if (((appoggio1 == '.') || (appoggio1 == ',')) && (pos_sep == VALORE_INZIALIZZATO)) {
 				pos_sep = i1;
 			}else if ((appoggio1 == '\n') || (appoggio1 == EOF)) {

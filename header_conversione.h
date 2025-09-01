@@ -4,11 +4,12 @@ enum valori_flag {
 	input_vuoto, 
 	val_default, 
 	input_corretto,
-	inserire_diametro
+	inserire_diametro,
+	inserire_impegno_in_larghezza
 };
 
 struct inserimento {
-	enum valori_flag flag;
+	int flag;
 	float numero;
 };
 
