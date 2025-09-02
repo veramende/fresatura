@@ -1,27 +1,9 @@
 #include <stdio.h>
-#include<string.h>
+#include <string.h>
 //********************************* costanti ************************
 #define PI_GRECO 3.14
 #define MAX_CHAR 5 //lunghezza massima campi input
 #define MAX_STRING 80
-enum indici {
-	//parametri del software cam
-	i_rpm,
-	i_feedspeed,
-	//inseribili opzionali
-	i_diametro,
-	i_ntagl,		//da fare
-	i_profondita,	//da fare
-	i_coef_mat,		//da fare
-	//calcolabili e definibili
-	i_feedrate,
-	i_cutspeed,
-	//solo calcolabili
-	i_mat_asp_giro,		//da fare - mm^3/giro --> (profondita * diametro utile * avanzamento) / rpm
-	i_mat_asp_dente, 	//da fare - materiale asportato / n taglienti
-	i_kw, //da fare (materiale asportato * coefficiente taglio materiale) / (60 * 1000) - risultato in KW
-	opzioni_disponibili,
-};
 
 enum flag_ok_stampa{
 	non_stampare = 0,
@@ -69,19 +51,36 @@ int main()
 	//******************************** codice ***********************************************
 	do{	
 		refresh_schermata(param1, i1);
-		val_appoggio = input_val(MAX_CHAR);
+		val_appoggio = input_val(MAX_CHAR, ch_main);
 		switch (val_appoggio.flag) {
 		case input_corretto:
-			param1[i1].valore = val_appoggio.numero;
-			switch (i1) {
-			case i_rpm:
-				calcola_feedrate(param1);	//ricalcolo la velocità di avanzamento per mantenere lo stesso feed rate
+			switch (val_appoggio.indice) {
+			case fac_diametro:
+				param1[i_diametro].valore = val_appoggio.numero;
+				param1[i_diametro].flag_stampa = ok_stampa;
 				break;
-			case i_feedspeed:
-				calcola_feedrate(param1);
+			case fac_ntagl:
+				break;
+			case fac_profondita:
+				break;
+			case fac_cutspeed:
+				break;
+			case fac_coef_mat:
+				break;
+			case fac_feedrate:
 				break;
 			default:
-				break;
+				param1[i1].valore = val_appoggio.numero;
+				switch (i1) {
+				case i_rpm:
+					calcola_feedrate(param1);	//ricalcolo la velocità di avanzamento per mantenere lo stesso feed rate
+					break;
+				case i_feedspeed:
+					calcola_feedrate(param1);
+					break;
+				default:
+					break;
+				}
 			}
 			break;
 		case input_vuoto:

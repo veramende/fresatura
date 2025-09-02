@@ -4,7 +4,7 @@
 #define INIZIO_ARRAY 0
 #define VALORE_INZIALIZZATO -1
 
-struct inserimento input_val(int max_len)
+struct inserimento input_val(const int max_len, const int chiamante)
 {
 	int i1, appoggio1, comando1[max_len], iv_len, pos_sep;
 	struct inserimento dato_inserito;
@@ -15,43 +15,69 @@ struct inserimento input_val(int max_len)
 	pos_sep = VALORE_INZIALIZZATO;
 	dato_inserito.flag = val_default;
 	dato_inserito.numero = 0;
-	i1 = INIZIO_ARRAY;
+	dato_inserito.indice = fac_default;
 	
-	while (dato_inserito.flag == val_default) {
+	for (i1 = INIZIO_ARRAY; dato_inserito.flag == val_default; i1++) {
+		if (i1 > (max_len)) {
+			dato_inserito.flag = input_non_valido;
+			break;
+		}
 		appoggio1 = getchar();
 		if ((appoggio1 >= '0') && (appoggio1 <= '9')) {
 			comando1[i1] = appoggio1;
-			i1++;
-			if (i1 > (max_len))
-				dato_inserito.flag = input_non_valido; 
 		} else {
-			switch (appoggio1) {
-			case fac_quit:
-				dato_inserito.flag = quit;
-				break;
-			case fac_diametro:
-				dato_inserito.flag = inserire_diametro;
-				break;
-			case ',':
-			case '.':
-				if (pos_sep == VALORE_INZIALIZZATO)
-					pos_sep = i1;
-				else
-					dato_inserito.flag = input_non_valido;
-				break;
-			case '\n':
-			case EOF:
-				if (i1 == INIZIO_ARRAY) 
+			if ((i1 == INIZIO_ARRAY) && (chiamante == ch_main)) {
+				switch (appoggio1) {
+				case fac_quit:
+					dato_inserito.flag = quit;
+					break;
+				case fac_diametro:
+					dato_inserito.indice = i_diametro;
+					break;
+				case fac_ntagl:
+					dato_inserito.indice = i_ntagl;
+					break;
+				case fac_profondita:
+					dato_inserito.indice = i_profondita;
+					break;
+				case fac_cutspeed:
+					dato_inserito.indice = i_cutspeed;
+					break;
+				case fac_coef_mat:
+					dato_inserito.indice = i_coef_mat;
+					break;
+				case fac_feedrate:
+					dato_inserito.indice = i_feedrate;
+					break;
+				case '\n':
+				case EOF:
 					dato_inserito.flag = input_vuoto;
-				else
+					break;
+				default:
+					dato_inserito.flag = input_non_valido;
+					break;
+				}
+			} else {
+				switch (appoggio1) {
+				case ',':
+				case '.':
+					if (pos_sep == VALORE_INZIALIZZATO)
+						pos_sep = i1;
+					else
+						dato_inserito.flag = input_non_valido;
+					break;
+				case '\n':
+				case EOF:
 					dato_inserito.flag = input_corretto;
-			default:
-				dato_inserito.flag = input_non_valido;
-				break;
+					break;
+				default:
+					dato_inserito.flag = input_non_valido;
+					break;
+				}
 			}
 		}
 	}
-	if ((dato_inserito.flag != input_corretto) && (dato_inserito.flag != input_vuoto)) {
+	if ((dato_inserito.flag != input_corretto) && (dato_inserito.flag != input_vuoto) && (dato_inserito.flag != mod_facoltativo)) {
 		while ((appoggio1 != '\n') && (appoggio1 != EOF)) 
 			appoggio1 = getchar(); //svuota stdin
 	}
