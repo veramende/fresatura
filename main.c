@@ -3,65 +3,82 @@
 //********************************* costanti ************************
 #define PI_GRECO 3.14
 #define MAX_CHAR 5 //lunghezza massima campi input
+#define MAX_STRING 80
 enum indici {
-	i_diametro = 0,
-	i_larghezza, //da fare
-	i_profondita, //da fare
+	//parametri del software cam
 	i_rpm,
 	i_feedspeed,
+	//inseribili opzionali
+	i_diametro,
+	i_ntagl,		//da fare
+	i_profondita,	//da fare
+	i_coef_mat,		//da fare
+	//calcolabili e definibili
 	i_feedrate,
-	i_materiale_asportato, //da fare - mm^3 al min, profondita * impegno in arghezza * feedspeed * 1000
-	i_potenza_assorbita, //da fare (materiale asportato * coefficiente taglio materiale) / (60 * 1000) - risultato in KW
+	i_cutspeed,
+	//solo calcolabili
+	i_mat_asp_giro,		//da fare - mm^3/giro --> (profondita * diametro utile * avanzamento) / rpm
+	i_mat_asp_dente, 	//da fare - materiale asportato / n taglienti
+	i_kw, //da fare (materiale asportato * coefficiente taglio materiale) / (60 * 1000) - risultato in KW
 	opzioni_disponibili,
+};
+
+enum flag_ok_stampa{
+	non_stampare = 0,
+	ok_stampa,
+};
+
+struct parametri {
+	float valore;
+	char dicitura_menu[MAX_STRING];
+	int flag_stampa;
 };
 //**************** funzioni e tipi **********************************
 #include "header_conversione.h"
-static inline void calcola_rpm(float *cr_param) {
-	cr_param[i_rpm] = (cr_param[i_feedspeed] * 1000) / cr_param[i_feedrate];
-}
-static inline void calcola_feedspeed(float *ca_param) {
-	ca_param[i_feedspeed] = ca_param[i_feedrate] * 0.001 * ca_param[i_rpm] ;
-}
-static inline void calcola_feedrate(float *ct_param) {
-	ct_param[i_feedrate] = (ct_param[i_feedspeed] * 1000) / ct_param[i_rpm];
-}
-
-void refresh_schermata(float *rs_param, const int rs_cursore);
-static inline float calcola_cutspeed(float *cc_param) {
-	return (cc_param[i_rpm] * PI_GRECO * cc_param[i_diametro] * 0.001);
-}
+static void refresh_schermata(struct parametri *rs_param, const int rs_cursore);
+static void check_stampa(struct parametri *cs_param, const int indice);
+static void calcola_rpm(struct parametri  *cr_param);
+static void calcola_feedspeed(struct parametri *ca_param);
+static void calcola_feedrate(struct parametri *ct_param);
+static void calcola_cutspeed(struct parametri *cc_param);
 
 int main()
 {
-	float param1[opzioni_disponibili];	//array contenente i parametri di fresatura
-	char dicitura_input [opzioni_disponibili][30];
+	struct parametri param1[opzioni_disponibili];	//array contenente i parametri di fresatura
 	struct inserimento val_appoggio;
 	int i1;
 	//********************************* inizializzazioni *************************************
-	for (i1 = 0; i1 < opzioni_disponibili; i1++)
-		param1[i1] = 0;
-	calcola_feedspeed(param1);
-	strcpy(dicitura_input[i_rpm],			"RPM");
-	strcpy(dicitura_input[i_feedspeed],	"velocita avanz (m/min)");
-	strcpy(dicitura_input[i_feedrate],	"avanzamento per giro");
+	for (i1 = 0; i1 < opzioni_disponibili; i1++) {
+		param1[i1].valore = 0;
+		param1[i1].flag_stampa = non_stampare;
+	}
+	strcpy(param1[i_diametro].dicitura_menu,		"                     diametro: %1.0f mm");
+	strcpy(param1[i_ntagl].dicitura_menu,			"             numero taglienti: %1f m/min");
+	strcpy(param1[i_profondita].dicitura_menu,		"          profondita' passata: %2.1f m/min");
+	strcpy(param1[i_cutspeed].dicitura_menu,		"           velocita' rotativa: %1.2f mm");
+	strcpy(param1[i_coef_mat].dicitura_menu,		"coefficiente taglio materiale: %2.1f m/min");
+	strcpy(param1[i_rpm].dicitura_menu,				"                          RPM: %5.0f");
+	strcpy(param1[i_feedspeed].dicitura_menu,		"        velocita' avanzamento: %2.1f m/min");
+	strcpy(param1[i_feedrate].dicitura_menu,		"         avanzamento per giro: %1.2f mm");
+	strcpy(param1[i_mat_asp_giro].dicitura_menu,	" materiale asportato per giro: %2.2f mm^3");
+	strcpy(param1[i_mat_asp_dente].dicitura_menu,	"    mat asport x giro x dente: %2.2f mm^3");
+	strcpy(param1[i_kw].dicitura_menu,				"            potenza assorbita: %3.2f KW");
+	param1[i_rpm].flag_stampa = ok_stampa;
+	param1[i_feedspeed].flag_stampa = ok_stampa;
 	i1 = i_rpm;
 	//******************************** codice ***********************************************
 	do{	
 		refresh_schermata(param1, i1);
-		printf("(q - quit, d - diametro fresa, i - impegno in larghezza %%)\ninserire %s: ",dicitura_input[i1]);
 		val_appoggio = input_val(MAX_CHAR);
 		switch (val_appoggio.flag) {
 		case input_corretto:
-			param1[i1] = val_appoggio.numero;
+			param1[i1].valore = val_appoggio.numero;
 			switch (i1) {
 			case i_rpm:
-				calcola_feedspeed(param1);	//ricalcolo la velocità di avanzamento per mantenere lo stesso feed rate
+				calcola_feedrate(param1);	//ricalcolo la velocità di avanzamento per mantenere lo stesso feed rate
 				break;
 			case i_feedspeed:
 				calcola_feedrate(param1);
-				break;
-			case i_feedrate:
-				calcola_rpm(param1);
 				break;
 			default:
 				break;
@@ -69,24 +86,8 @@ int main()
 			break;
 		case input_vuoto:
 			i1++;
-			if (i1 > i_feedrate) 
+			if (i1 > i_feedspeed) 
 				i1 = i_rpm;
-			break;
-		case inserire_diametro:
-			do{
-				printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); //clear screen
-				printf("inserire diametro (q - quit): ");
-				val_appoggio = input_val(1);
-			} while ((val_appoggio.flag != input_corretto) && (val_appoggio.flag != quit));
-			param1[i_diametro] = val_appoggio.numero;
-			break;
-		case inserire_impegno_in_larghezza:
-			do{
-				printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); //clear screen
-				printf("inserire impegno fresa in larghezza (q - quit): ");
-				val_appoggio = input_val(1);
-			} while ((val_appoggio.flag != input_corretto) && (val_appoggio.flag != quit));
-			param1[i_larghezza] = val_appoggio.numero;
 			break;
 		default:
 			break;
@@ -95,34 +96,50 @@ int main()
 	return 0; //****************************** fine *************************************************
 }
 
-void refresh_schermata(float *rs_param, const int rs_cursore)
+static void refresh_schermata(struct parametri *rs_param, const int rs_cursore)
 {
-	char rs_video[opzioni_disponibili][60],rs_appoggio[30];
 	int i1;
-	
-	for (i1=0; i1 < opzioni_disponibili; i1++)
-		strcpy(rs_video[i1], "\n");
-	
-	if (rs_param[i_diametro] > 0) {
-		strcpy(rs_video[i_diametro],	"        diametro fresa: %1.1f mm");
-		strcpy(rs_video[i_rpm],		"                  RPM: %5.0f (");
-		sprintf(rs_appoggio,"%3.1f m/min)", calcola_cutspeed(rs_param));
-		strcat(rs_video[i_rpm], rs_appoggio);
-	} else {
-		strcpy(rs_video[i_rpm],		"                  RPM: %5.0f");
-	}
-	strcpy(rs_video[i_feedspeed],		"velocita' avanzamento: %2.1f m/min");
-	strcpy(rs_video[i_feedrate],		"avanzamento per giro: %1.2f mm");
 	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); //clear screen
-	
 	for (i1=0; i1 < opzioni_disponibili; i1++) {
-		if (strlen(rs_video[i1]) > 1) {
-			printf(rs_video[i1], rs_param[i1]);
+		if (rs_param[i1].flag_stampa == ok_stampa) {
+			printf(rs_param[i1].dicitura_menu, rs_param[i1].valore);
 			if (i1 == rs_cursore)
 				printf(" <--");
 			printf("\n");
 		}
 	}
 	printf("\n\n");
-}	
+}
+
+static void check_stampa(struct parametri *cs_param, const int indice)
+{
+	if (cs_param[indice].valore == 0)
+		cs_param[indice].flag_stampa = non_stampare;
+	else
+		cs_param[indice].flag_stampa = ok_stampa;
+}
+
+static void calcola_rpm(struct parametri  *cr_param)
+{
+	if ((cr_param[i_feedspeed].valore > 0) && (cr_param[i_feedrate].valore > 0))
+		cr_param[i_rpm].valore = (cr_param[i_feedspeed].valore * 1000) / cr_param[i_feedrate].valore;
+}
+static void calcola_feedspeed(struct parametri *ca_param)
+{
+	if ((ca_param[i_feedrate].valore > 0) && (ca_param[i_rpm].valore > 0))
+		ca_param[i_feedspeed].valore = ca_param[i_feedrate].valore * 0.001 * ca_param[i_rpm].valore ;
+}
+static void calcola_feedrate(struct parametri *cfr_param)
+{
+	if ((cfr_param[i_feedspeed].valore > 0) && (cfr_param[i_rpm].valore > 0))
+		cfr_param[i_feedrate].valore = (cfr_param[i_feedspeed].valore * 1000) / cfr_param[i_rpm].valore;
+}
+
+static void calcola_cutspeed(struct parametri *cc_param)
+{
+	if ((cc_param[i_rpm].valore > 0) && (cc_param[i_diametro].valore > 0)) {
+		cc_param[i_cutspeed].valore = (cc_param[i_rpm].valore * PI_GRECO * cc_param[i_diametro].valore * 0.001);
+		check_stampa(cc_param, i_cutspeed);
+	}
+}
 

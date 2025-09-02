@@ -5,12 +5,21 @@ enum valori_flag {
 	val_default, 
 	input_corretto,
 	inserire_diametro,
-	inserire_impegno_in_larghezza
 };
 
 struct inserimento {
 	int flag;
 	float numero;
+};
+
+enum input_facoltativi {
+	fac_quit = 'q',
+	fac_diametro = 'd',
+	fac_ntagl = 'n',
+	fac_profondita = 'p',
+	fac_cutspeed = 'c',
+	fac_coef_mat = 'm',	//coefficiente di forza di taglio specifica per materiale
+	fac_feedrate = 'f',
 };
 
 //funzioni

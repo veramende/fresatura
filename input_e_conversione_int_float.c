@@ -25,21 +25,29 @@ struct inserimento input_val(int max_len)
 			if (i1 > (max_len))
 				dato_inserito.flag = input_non_valido; 
 		} else {
-			if (((appoggio1 == 'q') || (appoggio1 == 'Q')) && (i1 == 0)) {
+			switch (appoggio1) {
+			case fac_quit:
 				dato_inserito.flag = quit;
-			} else if (((appoggio1 == 'd') || (appoggio1 == 'D')) && (i1 == 0)) {
+				break;
+			case fac_diametro:
 				dato_inserito.flag = inserire_diametro;
-			} else if (((appoggio1 == 'i') || (appoggio1 == 'I')) && (i1 == 0)) {
-				dato_inserito.flag = inserire_impegno_in_larghezza;
-			}else if (((appoggio1 == '.') || (appoggio1 == ',')) && (pos_sep == VALORE_INZIALIZZATO)) {
-				pos_sep = i1;
-			}else if ((appoggio1 == '\n') || (appoggio1 == EOF)) {
-				if (i1 == 0) 
+				break;
+			case ',':
+			case '.':
+				if (pos_sep == VALORE_INZIALIZZATO)
+					pos_sep = i1;
+				else
+					dato_inserito.flag = input_non_valido;
+				break;
+			case '\n':
+			case EOF:
+				if (i1 == INIZIO_ARRAY) 
 					dato_inserito.flag = input_vuoto;
 				else
 					dato_inserito.flag = input_corretto;
-			} else {
+			default:
 				dato_inserito.flag = input_non_valido;
+				break;
 			}
 		}
 	}
