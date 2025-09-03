@@ -4,9 +4,10 @@
 #define INIZIO_ARRAY 0
 #define VALORE_INZIALIZZATO -1
 
-struct inserimento input_val(const int max_len, const int chiamante)
+struct inserimento input_val(const int max_len)
 {
-	int i1, appoggio1, comando1[max_len], iv_len, pos_sep;
+	int i1, appoggio1, comando1[max_len], pos_sep;
+	bool flag_eof = false;
 	struct inserimento dato_inserito;
 	
 	int iterazioni = 0;
@@ -15,95 +16,90 @@ struct inserimento input_val(const int max_len, const int chiamante)
 	pos_sep = VALORE_INZIALIZZATO;
 	dato_inserito.flag = val_default;
 	dato_inserito.numero = 0;
-	dato_inserito.indice = fac_default;
+	for (i1 = INIZIO_ARRAY; i1 < max_len; i1++)
+		comando1[i1] = 0;
 	
-	for (i1 = INIZIO_ARRAY; dato_inserito.flag == val_default; i1++) {
-		if (i1 > (max_len)) {
-			dato_inserito.flag = input_non_valido;
-			break;
-		}
+	appoggio1 = getchar();
+	if (check_flag_opzionali(appoggio1) == false) {
+		dato_inserito.flag = input_non_valido;
+	} else {
+		if (appoggio1 == flag_quit)
+			dato_inserito.flag = flag_quit;
+	}
+	
+	i1 = INIZIO_ARRAY;
+	while ((i1 < max_len) && (dato_inserito.flag == val_default)) {
 		appoggio1 = getchar();
 		if ((appoggio1 >= '0') && (appoggio1 <= '9')) {
-			comando1[i1] = appoggio1;
+			comando1[i1] = appoggio1 - '0';	//conversione da char a int
 		} else {
-			if ((i1 == INIZIO_ARRAY) && (chiamante == ch_main)) {
-				switch (appoggio1) {
-				case fac_quit:
-					dato_inserito.flag = quit;
-					break;
-				case fac_diametro:
-					dato_inserito.indice = i_diametro;
-					break;
-				case fac_ntagl:
-					dato_inserito.indice = i_ntagl;
-					break;
-				case fac_profondita:
-					dato_inserito.indice = i_profondita;
-					break;
-				case fac_cutspeed:
-					dato_inserito.indice = i_cutspeed;
-					break;
-				case fac_coef_mat:
-					dato_inserito.indice = i_coef_mat;
-					break;
-				case fac_feedrate:
-					dato_inserito.indice = i_feedrate;
-					break;
-				case '\n':
-				case EOF:
-					dato_inserito.flag = input_vuoto;
-					break;
-				default:
+			switch (appoggio1) {
+			case ',':
+			case '.':
+				if (pos_sep == VALORE_INZIALIZZATO)
+					pos_sep = i1;
+				else
 					dato_inserito.flag = input_non_valido;
-					break;
-				}
-			} else {
-				switch (appoggio1) {
-				case ',':
-				case '.':
-					if (pos_sep == VALORE_INZIALIZZATO)
-						pos_sep = i1;
-					else
-						dato_inserito.flag = input_non_valido;
-					break;
-				case '\n':
-				case EOF:
-					dato_inserito.flag = input_corretto;
-					break;
-				default:
-					dato_inserito.flag = input_non_valido;
-					break;
-				}
+				break;
+			case '\n':
+			case EOF:
+				dato_inserito.flag = input_corretto;
+				flag_eof = true;
+				break;
+			default:
+				dato_inserito.flag = input_non_valido;
+				break;
 			}
 		}
+		if (dato_inserito.flag == val_default)
+			i1++;
 	}
-	if ((dato_inserito.flag != input_corretto) && (dato_inserito.flag != input_vuoto) && (dato_inserito.flag != mod_facoltativo)) {
+	if (flag_eof == false) {
 		while ((appoggio1 != '\n') && (appoggio1 != EOF)) 
 			appoggio1 = getchar(); //svuota stdin
 	}
 	
 	if (dato_inserito.flag == input_corretto) {
-		iv_len = i1;
 		if (pos_sep == VALORE_INZIALIZZATO)
-			pos_sep = iv_len;
-		dato_inserito.numero = conv_ascii_num(comando1,iv_len,pos_sep);
+			pos_sep = i1;
+		dato_inserito.numero = conv_num(comando1,i1,pos_sep);
 	}
 	return dato_inserito;
 }
 
-float conv_ascii_num(int *stringa1, int len1, int pos_sep) //per le conversioni di valori interi basta impostare il separatore alla posizione massima
+float conv_num(int *stringa1, int len1, int pos_sep) //per le conversioni di valori interi basta impostare il separatore alla posizione massima
 {
 	int i1;
 	float totale1 = 0;
 	float coefficiente = 0.1;
 	
-	for(i1=0;i1<pos_sep;i1++) coefficiente = coefficiente * 10;
+	for(i1=0;i1<pos_sep;i1++)
+		coefficiente = coefficiente * 10;
 	
 	for(i1=0;i1<len1;i1++) {
 		if ((stringa1[i1] != '.') && (stringa1[i1] != ',')) {
-			totale1 += (float)(stringa1[i1]-'0')*coefficiente;
+			totale1 += (float)stringa1[i1]*coefficiente;
 			coefficiente = coefficiente / 10;
 		}
 	}
 	return totale1;
+}
+
+bool check_flag_opzionali(const int rif)
+{
+	switch (rif) {
+	case flag_quit:
+	case flag_diametro:
+	case flag_ntagl:
+	case flag_profondita:
+	case flag_cutspeed:
+	case flag_coef_mat:
+	case flag_feedrate:
+	case flag_rpm:
+	case flag_feedspeed:
+		return true;
+		break;
+	default:
+		return false;
+	}
 }
