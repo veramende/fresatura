@@ -153,7 +153,7 @@ static void calcola_mat_asp_giro_dente(struct parametri *f_param)
 }
 
 static void calcola_potenza(struct parametri *f_param) {
-	f_param[i_kw].valore = (f_param[i_coef_mat].valore * f_param[i_mat_asp_dente].valore * f_param[i_ntagl].valore * f_param[i_rpm].valore) / (0.75 * 60 * 1000 * 1000);
+	f_param[i_kw].valore = (f_param[i_coef_mat].valore * f_param[i_feedspeed].valore * f_param[i_diametro].valore * f_param[i_profondita].valore) / (60000);
 }
 
 static void cascata_dipendenze(struct parametri *f_param, int val_cambiato)
@@ -163,13 +163,11 @@ static void cascata_dipendenze(struct parametri *f_param, int val_cambiato)
 		rpm_da_cutspeed(f_param);
 		calcola_feedrate(f_param);	//copia di cascata_rpm senza cutspeed ovviamente
 		calcola_mat_asp_giro_dente(f_param);
-		calcola_potenza(f_param);
 		break;
 	case i_rpm:
 		calcola_cutspeed(f_param);
 		calcola_feedrate(f_param);
 		calcola_mat_asp_giro_dente(f_param);
-		calcola_potenza(f_param);
 		break;
 	case i_feedspeed:
 		calcola_feedrate(f_param);
@@ -183,7 +181,6 @@ static void cascata_dipendenze(struct parametri *f_param, int val_cambiato)
 		break;
 	case i_ntagl:
 		calcola_mat_asp_giro_dente(f_param);
-		calcola_potenza(f_param);
 		break;
 	case i_profondita:
 		calcola_mat_asp_giro_dente(f_param);
@@ -192,7 +189,6 @@ static void cascata_dipendenze(struct parametri *f_param, int val_cambiato)
 	case i_feedrate:
 		calcola_rpm(f_param);
 		calcola_mat_asp_giro_dente(f_param);
-		calcola_potenza(f_param);
 		break;
 	case i_coef_mat:
 		calcola_potenza(f_param);
