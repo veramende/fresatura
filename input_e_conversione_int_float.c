@@ -1,8 +1,47 @@
 #include <stdio.h> //serve solo per getchar()
+#include <stdbool.h>
 #include "header_conversione.h"
 
 #define INIZIO_ARRAY 0
 #define VALORE_INZIALIZZATO -1
+
+static bool check_flag_opzionali(int rif)
+{
+	switch (rif) {
+	case flag_quit:
+	case flag_diametro:
+	case flag_ntagl:
+	case flag_profondita:
+	case flag_cutspeed:
+	case flag_coef_mat:
+	case flag_feedrate:
+	case flag_rpm:
+	case flag_feedspeed:
+		return true;
+		break;
+	default:
+		return false;
+	}
+}
+
+static float conv_num(int *stringa1, int len1, int pos_sep) //per le conversioni di valori interi basta impostare il separatore alla posizione massima
+{
+	int i1;
+	float totale1 = 0;
+	float coefficiente = 0.1;
+	
+	for(i1=0;i1<pos_sep;i1++)
+		coefficiente = coefficiente * 10;
+	
+	for(i1=0;i1<len1;i1++) {
+		if (i1 != pos_sep) {
+			printf("\n%f\n", stringa1[i1] * coefficiente);
+			totale1 += (float) (stringa1[i1] * coefficiente);
+			coefficiente = coefficiente / 10;
+		}
+	}
+	return totale1;
+}
 
 struct inserimento input_val(const int max_len)
 {
@@ -23,12 +62,21 @@ struct inserimento input_val(const int max_len)
 	if (check_flag_opzionali(appoggio1) == false) {
 		dato_inserito.flag = input_non_valido;
 	} else {
-		if (appoggio1 == flag_quit)
+		if (appoggio1 == flag_quit) {
 			dato_inserito.flag = flag_quit;
+			return dato_inserito;
+		} else {
+			dato_inserito.flag = appoggio1;
+		}
 	}
 	
-	i1 = INIZIO_ARRAY;
-	while ((i1 < max_len) && (dato_inserito.flag == val_default)) {
+	i1 = INIZIO_ARRAY - 1;
+	while ((dato_inserito.flag != input_non_valido) && (flag_eof == false)) {
+		i1++;
+		if (i1 > max_len) {
+			dato_inserito.flag = input_non_valido;
+			break;
+		}
 		appoggio1 = getchar();
 		if ((appoggio1 >= '0') && (appoggio1 <= '9')) {
 			comando1[i1] = appoggio1 - '0';	//conversione da char a int
@@ -43,7 +91,6 @@ struct inserimento input_val(const int max_len)
 				break;
 			case '\n':
 			case EOF:
-				dato_inserito.flag = input_corretto;
 				flag_eof = true;
 				break;
 			default:
@@ -51,55 +98,17 @@ struct inserimento input_val(const int max_len)
 				break;
 			}
 		}
-		if (dato_inserito.flag == val_default)
-			i1++;
 	}
 	if (flag_eof == false) {
 		while ((appoggio1 != '\n') && (appoggio1 != EOF)) 
 			appoggio1 = getchar(); //svuota stdin
 	}
-	
-	if (dato_inserito.flag == input_corretto) {
+	if (dato_inserito.flag != input_non_valido) {
 		if (pos_sep == VALORE_INZIALIZZATO)
 			pos_sep = i1;
 		dato_inserito.numero = conv_num(comando1,i1,pos_sep);
 	}
+	if (dato_inserito.numero == 0)
+		dato_inserito.flag = input_non_valido;
 	return dato_inserito;
-}
-
-float conv_num(int *stringa1, int len1, int pos_sep) //per le conversioni di valori interi basta impostare il separatore alla posizione massima
-{
-	int i1;
-	float totale1 = 0;
-	float coefficiente = 0.1;
-	
-	for(i1=0;i1<pos_sep;i1++)
-		coefficiente = coefficiente * 10;
-	
-	for(i1=0;i1<len1;i1++) {
-		if ((stringa1[i1] != '.') && (stringa1[i1] != ',')) {
-			totale1 += (float)stringa1[i1]*coefficiente;
-			coefficiente = coefficiente / 10;
-		}
-	}
-	return totale1;
-}
-
-bool check_flag_opzionali(const int rif)
-{
-	switch (rif) {
-	case flag_quit:
-	case flag_diametro:
-	case flag_ntagl:
-	case flag_profondita:
-	case flag_cutspeed:
-	case flag_coef_mat:
-	case flag_feedrate:
-	case flag_rpm:
-	case flag_feedspeed:
-		return true;
-		break;
-	default:
-		return false;
-	}
 }
