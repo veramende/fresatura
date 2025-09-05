@@ -14,7 +14,7 @@ static bool check_flag_opzionali(int rif)
 	case flag_profondita:
 	case flag_cutspeed:
 	case flag_coef_mat:
-	case flag_feedrate:
+	case flag_feedrate_generale:
 	case flag_rpm:
 	case flag_feedspeed:
 		return true;
@@ -32,7 +32,6 @@ static float conv_num(int *stringa1, int len1, int pos_sep) //per le conversioni
 	
 	for(i1=0;i1<pos_sep;i1++)
 		coefficiente = coefficiente * 10;
-	
 	for(i1=0;i1<len1;i1++) {
 		if (i1 != pos_sep) {
 			printf("\n%f\n", stringa1[i1] * coefficiente);
@@ -48,8 +47,6 @@ struct inserimento input_val(const int max_len)
 	int i1, appoggio1, comando1[max_len], pos_sep;
 	bool flag_eof = false;
 	struct inserimento dato_inserito;
-	
-	int iterazioni = 0;
 	
 	//inizializzazioni
 	pos_sep = VALORE_INZIALIZZATO;
@@ -108,7 +105,5 @@ struct inserimento input_val(const int max_len)
 			pos_sep = i1;
 		dato_inserito.numero = conv_num(comando1,i1,pos_sep);
 	}
-	if (dato_inserito.numero == 0)
-		dato_inserito.flag = input_non_valido;
 	return dato_inserito;
 }

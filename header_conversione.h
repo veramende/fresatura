@@ -1,5 +1,5 @@
 enum valori_flag {
-	input_non_valido = 0, 
+	input_non_valido = 0,
 	val_default,
 	flag_quit = 'q',
 	flag_diametro = 'd',
@@ -7,7 +7,7 @@ enum valori_flag {
 	flag_profondita = 'p',
 	flag_cutspeed = 'c',
 	flag_coef_mat = 'k',	//coefficiente di forza di taglio specifica per materiale
-	flag_feedrate = 'f',
+	flag_feedrate_generale = 'f',
 	flag_rpm = 'r',
 	flag_feedspeed = 'a',
 };
@@ -23,9 +23,9 @@ enum indici {
 	i_coef_mat,
 	//calcolabili e definibili
 	i_cutspeed,
-	i_feedrate,
+	i_feedrate_generale,
 	//solo calcolabili
-	i_mat_asp_dente,
+	i_feedrate_per_tagliente,
 	i_kw,
 	opzioni_disponibili,
 };
