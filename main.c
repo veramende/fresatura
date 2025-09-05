@@ -133,21 +133,15 @@ int main()
 
 static void calcola_rpm_da_feedspeed(struct parametri  *f_param)
 {
-	float denominatore;
-	if (f_param[i_feedrate_generale].valore == 0)
-		denominatore = 1;
-	else
-		denominatore = f_param[i_feedrate_generale].valore;
-	f_param[i_rpm].valore = (f_param[i_feedspeed].valore * 1000) / denominatore;
+	if (f_param[i_feedrate_generale].valore == 0) //controllo denominatore
+		f_param[i_feedrate_generale].valore = 1;
+	f_param[i_rpm].valore = (f_param[i_feedspeed].valore * 1000) / f_param[i_feedrate_generale].valore;
 }
 static void calcola_rpm_da_cutspeed(struct parametri  *f_param)
 {
-	float denominatore;
-	if (f_param[i_diametro].valore == 0)
-		denominatore = 1;
-	else
-		denominatore = (PI_GRECO * f_param[i_diametro].valore);
-	f_param[i_rpm].valore = (f_param[i_cutspeed].valore * 1000) / denominatore;
+	if (f_param[i_diametro].valore == 0) //controllo denominatore
+		f_param[i_diametro].valore = 1;
+	f_param[i_rpm].valore = (f_param[i_cutspeed].valore * 1000) / (PI_GRECO * f_param[i_diametro].valore);
 }
 static void calcola_feedspeed(struct parametri *f_param)
 {
@@ -155,21 +149,15 @@ static void calcola_feedspeed(struct parametri *f_param)
 }
 static void calcola_feedrate_generale(struct parametri *f_param)
 {
-	float denominatore;
-	if (f_param[i_rpm].valore == 0)
-		denominatore = 1;
-	else
-		denominatore = f_param[i_rpm].valore;
-	f_param[i_feedrate_generale].valore = (f_param[i_feedspeed].valore * 1000) / denominatore;
+	if (f_param[i_rpm].valore == 0)	//controllo denominatore
+		f_param[i_rpm].valore = 1;
+	f_param[i_feedrate_generale].valore = (f_param[i_feedspeed].valore * 1000) / f_param[i_rpm].valore;
 }
 static void calcola_feedrate_per_tagliente(struct parametri *f_param)
 {
-	float denominatore;
-	if (f_param[i_ntagl].valore == 0)
-		denominatore = 1;
-	else
-		denominatore = f_param[i_ntagl].valore;
-	f_param[i_feedrate_per_tagliente].valore = f_param[i_feedrate_generale].valore / denominatore;
+	if (f_param[i_ntagl].valore == 0)	//controllo denominatore
+		f_param[i_ntagl].valore = 1;
+	f_param[i_feedrate_per_tagliente].valore = f_param[i_feedrate_generale].valore / f_param[i_ntagl].valore;
 }
 static void calcola_cutspeed(struct parametri *f_param)
 {
