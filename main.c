@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 //********************************* costanti ************************
 #define PI_GRECO 3.14
 #define MAX_CHAR 7 //lunghezza massima campi input compreso eof
