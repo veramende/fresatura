@@ -3,12 +3,11 @@
 #include <stdbool.h>
 //********************************* costanti ************************
 #define PI_GRECO 3.14
-#define MAX_CHAR 7 //lunghezza massima campi input compreso eof
+#define MAX_CHAR 6 //lunghezza massima campi input compreso eof
 #define MAX_STRING 80
 #define INIZIO_ARRAY 0
 
 enum flag_menu {
-	val_default = '-',
 	flag_quit = 'q',
 	flag_diametro = 'd',
 	flag_ntagl = 'n',
@@ -52,10 +51,10 @@ static void calcola_feedrate_per_tagliente(struct voci_menu *f_param);
 static void calcola_cutspeed(struct voci_menu *f_param);
 static void calcola_potenza(struct voci_menu *f_param);
 static void cascata_dipendenze(struct voci_menu *f_param, int val_cambiato);
-int controllo_primo_carattere(int cerca, struct voci_menu *cfo_param);
+static int controllo_primo_carattere(int cerca, struct voci_menu *cfo_param);
 static void inizializza(struct voci_menu *iniz_param);
 static void stampa_schermata_menu(struct voci_menu *menu_param);
-int scelta_dipendenza(struct voci_menu *s_param, const int opz1, const int opz2);
+static int scelta_dipendenza(struct voci_menu *s_param, const int opz1, const int opz2);
 static int lettura_stdin(char *stringa);
 static float conv_num(char *stringa1, const int len1);
 
@@ -70,9 +69,9 @@ int main()
 		stampa_schermata_menu(param1);
 		prefisso = getchar();
 		indice_voce_menu = controllo_primo_carattere(prefisso, param1);
-		if (indice_voce_menu < opzioni_disponibili) {
+		if ((indice_voce_menu < opzioni_disponibili) && (prefisso != flag_quit)) {
 			len_str = lettura_stdin(valore_letterale);
-			if (len_str != val_default) {
+			if (len_str > 0) {
 				param1[indice_voce_menu].valore = conv_num(valore_letterale, len_str);
 				cascata_dipendenze(param1, indice_voce_menu);
 				if (indice_voce_menu == i_feedrate_generale) {
@@ -174,7 +173,7 @@ static void cascata_dipendenze(struct voci_menu *f_param, int val_cambiato)
 	}
 }
 
-int scelta_dipendenza(struct voci_menu *s_param, const int opz1, const int opz2)
+static int scelta_dipendenza(struct voci_menu *s_param, const int opz1, const int opz2)
 {
 	const int max_len = 34;
 	char stringa_troncata[max_len], scelta;
@@ -201,7 +200,7 @@ static void inizializza(struct voci_menu *iniz_param)
 	int i1,i2;
 	for (i1 = INIZIO_ARRAY; i1 < opzioni_disponibili; i1++) {
 		iniz_param[i1].valore = 0;
-		iniz_param[i1].flag = val_default;
+		iniz_param[i1].flag = ' ';
 	}
 	iniz_param[i_ntagl].flag = (char)flag_ntagl;
 	iniz_param[i_diametro].flag = (char)flag_diametro;
@@ -238,7 +237,7 @@ static void stampa_schermata_menu(struct voci_menu *menu_param)
 	printf("q - quit\n\n");
 }
 
-int controllo_primo_carattere(int cerca, struct voci_menu *cfo_param)
+static int controllo_primo_carattere(int cerca, struct voci_menu *cfo_param)
 {
 	int i1;
 	for(i1 = INIZIO_ARRAY; i1 < opzioni_disponibili; i1++) {
@@ -257,7 +256,6 @@ static int lettura_stdin(char *stringa)
 	int i1 = INIZIO_ARRAY;
 	bool flag_separatore = false;
 	bool flag_eof = false;
-	bool flag_errore = false;
 	do{
 		appoggio1 = getchar();
 		if ((appoggio1 >= '0') && (appoggio1 <= '9')) {
@@ -270,7 +268,7 @@ static int lettura_stdin(char *stringa)
 					flag_separatore = true;
 					stringa[i1] = appoggio1;
 				} else {
-					flag_errore = true;
+					i1 = MAX_CHAR;
 				}
 				break;
 			case '\n':
@@ -278,23 +276,20 @@ static int lettura_stdin(char *stringa)
 				flag_eof = true;
 				break;
 			default:
-				flag_errore = true;
+				i1 = MAX_CHAR;
 				break;
 			}
 		} 
 		i1++;
-	}while ((i1 < MAX_CHAR - 1) && (flag_errore == false) && (flag_eof == false));
-	
+	}while ((i1 < MAX_CHAR) && (flag_eof == false));
+
 	if (flag_eof == false) {
-		while ((getchar() != '\n') && (getchar() != EOF)) {
+		while (getchar() != '\n') {
 		}
-	}
-			
-	if (flag_errore == false) {
-		stringa[i1] = 0; //carattere fine stringa
-		return i1;	//lunghezza stringa
+		return 0;
 	} else {
-		return val_default;
+		stringa[i1] = 0;	//char fine stringa
+		return i1;			//lunghezza stringa
 	}
 }
 		
