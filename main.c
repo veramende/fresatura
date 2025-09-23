@@ -57,7 +57,6 @@ static void calcola_coppia_richiesta(struct voci_menu *f_param);
 static void cascata_dipendenze(struct voci_menu *f_param, int val_cambiato);
 static int controllo_primo_carattere(int cerca, struct voci_menu *cfo_param);
 static void inizializza(struct voci_menu *iniz_param);
-static void stampa_schermata_menu(struct voci_menu *menu_param);
 static int scelta_dipendenza(struct voci_menu *s_param, const int opz1, const int opz2);
 static int lettura_stdin(char *stringa);
 static float conv_num(char *stringa1, const int len1);
@@ -66,16 +65,15 @@ static float conv_num(char *stringa1, const int len1);
 int main()
 {
 	struct voci_menu param1[opzioni_disponibili];	//array contenente i parametri di fresatura
-	int prefisso, indice_voce_menu, len_str;
+	int prefisso, indice_voce_menu, len_str, i1;
 	char valore_letterale[MAX_CHAR];
 	inizializza(param1);
 	do{	
-		stampa_schermata_menu(param1);
-	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); //clear screen
-	for (i1=INIZIO_ARRAY; i1 < opzioni_disponibili; i1++) {
-		printf(param1[i1].dicitura_menu, param1[i1].valore);
-	}
-	printf("q - quit\n\n");
+		printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); //clear screen
+		for (i1=INIZIO_ARRAY; i1 < opzioni_disponibili; i1++) {
+			printf(param1[i1].dicitura_menu, param1[i1].valore);
+		}
+		printf("q - quit\n\n");
 		prefisso = getchar();
 		indice_voce_menu = controllo_primo_carattere(prefisso, param1);
 		if ((indice_voce_menu < opzioni_disponibili) && (prefisso != flag_quit)) {
@@ -246,16 +244,6 @@ static void inizializza(struct voci_menu *iniz_param)
 	strcat(iniz_param[i_potenza_richiesta].dicitura_menu,	  "-			 potenza necessaria: %3.2f KW\n");
 	strcat(iniz_param[i_coppia_richiesta].dicitura_menu,	   "-			  coppia necessaria: %3.2f N/m\n");
 	strcat(iniz_param[i_feedrate_per_tagliente].dicitura_menu, "- avanzamento x giro x tagliente: %1.3f mm/giro\n");
-}
-
-static void stampa_schermata_menu(struct voci_menu *menu_param)
-{
-	int i1;
-	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); //clear screen
-	for (i1=INIZIO_ARRAY; i1 < opzioni_disponibili; i1++) {
-		printf(menu_param[i1].dicitura_menu, menu_param[i1].valore);
-	}
-	printf("q - quit\n\n");
 }
 
 static int controllo_primo_carattere(int cerca, struct voci_menu *cfo_param)
