@@ -4,7 +4,7 @@
 #include <math.h>
 //********************************* costanti ************************
 #define PI_GRECO 3.14
-#define MIN_RPM 10000
+#define MIN_RPM 1000
 #define MIN_TAGLIENTI 1
 #define MIN_DIAMETRO 1
 #define MIN_FEEDSPEED 0.5
@@ -41,6 +41,7 @@ enum indici {
 	//solo calcolabili
 	i_feedrate_per_tagliente,
     i_spessore_truciolo,
+    i_volume_truciolo, //volume asportato x giro x dente
 	i_coppia_richiesta,
 	i_potenza_richiesta,
 	i_coppia_erogata,
@@ -64,6 +65,7 @@ static void calcola_potenza_richiesta(struct voci_menu *f_param);
 static void calcola_coppia_richiesta(struct voci_menu *f_param);
 static void calcola_coppia_richiesta(struct voci_menu *f_param);
 static void calcola_spessore_truciolo(struct voci_menu *f_param);
+static void calcola_volume_truciolo(struct voci_menu *f_param);
 static void controllo_valori_minimi(struct voci_menu *f_param);
 static void cascata_dipendenze(struct voci_menu *f_param, int val_cambiato);
 static int controllo_primo_carattere(int cerca, struct voci_menu *cfo_param);
@@ -166,6 +168,11 @@ static void calcola_spessore_truciolo(struct voci_menu *f_param)
     controllo_valori_minimi(f_param);
 }
 
+static void calcola_volume_truciolo(struct voci_menu *f_param)
+{
+	f_param[i_volume_truciolo].valore = f_param[i_feedrate_per_tagliente].valore * f_param[i_larg_passata].valore * f_param[i_profondita].valore;
+    controllo_valori_minimi(f_param);
+}
 static void cascata_dipendenze(struct voci_menu *f_param, int val_cambiato)
 {
 	switch (val_cambiato){
@@ -174,6 +181,7 @@ static void cascata_dipendenze(struct voci_menu *f_param, int val_cambiato)
 		calcola_feedrate_generale(f_param);
 		calcola_feedrate_per_tagliente(f_param);
         calcola_spessore_truciolo(f_param);
+        calcola_volume_truciolo(f_param);
 		break;
 	case i_rpm:
 		calcola_cutspeed(f_param);
@@ -181,6 +189,7 @@ static void cascata_dipendenze(struct voci_menu *f_param, int val_cambiato)
 		calcola_feedrate_per_tagliente(f_param);
         calcola_spessore_truciolo(f_param);
         calcola_coppia_richiesta(f_param);
+        calcola_volume_truciolo(f_param);
 		break;
 	case i_feedspeed:
 		calcola_feedrate_generale(f_param);
@@ -188,27 +197,33 @@ static void cascata_dipendenze(struct voci_menu *f_param, int val_cambiato)
         calcola_spessore_truciolo(f_param);
 		calcola_potenza_richiesta(f_param);
         calcola_coppia_richiesta(f_param);
+        calcola_volume_truciolo(f_param);
 		break;
 	case i_diametro:
 		calcola_cutspeed(f_param);
 		calcola_potenza_richiesta(f_param);
         calcola_coppia_richiesta(f_param);
         calcola_spessore_truciolo(f_param);
+        calcola_volume_truciolo(f_param);
 		break;
 	case i_larg_passata:
         calcola_spessore_truciolo(f_param);
+        calcola_volume_truciolo(f_param);
 		break;
 	case i_ntagl:
 		calcola_feedrate_per_tagliente(f_param);
         calcola_spessore_truciolo(f_param);
+        calcola_volume_truciolo(f_param);
 		break;
 	case i_profondita:
 		calcola_potenza_richiesta(f_param);
-	calcola_coppia_richiesta(f_param);
+	    calcola_coppia_richiesta(f_param);
+        calcola_volume_truciolo(f_param);
 		break;
 	case i_feedrate_generale:
 		calcola_feedrate_per_tagliente(f_param);
         calcola_spessore_truciolo(f_param);
+        calcola_volume_truciolo(f_param);
 		break;
 	case i_coef_mat:
 		calcola_potenza_richiesta(f_param);
@@ -273,6 +288,7 @@ static void inizializza(struct voci_menu *iniz_param)
 	strcat(iniz_param[i_coppia_richiesta].dicitura_menu,        "-               coppia necessaria: %3.2f Nm\n");
 	strcat(iniz_param[i_feedrate_per_tagliente].dicitura_menu,  "-  avanzamento x giro x tagliente: %1.3f mm\n");
 	strcat(iniz_param[i_spessore_truciolo].dicitura_menu,       "-         spessore medio truciolo: %1.3f mm\n");
+	strcat(iniz_param[i_volume_truciolo].dicitura_menu,         "-                 volume truciolo: %1.3f mm^3\n");
     controllo_valori_minimi(iniz_param);
 }
 
