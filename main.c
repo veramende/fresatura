@@ -20,7 +20,7 @@ enum flag_menu {
 	flag_profondita = 'p',
 	flag_cutspeed = 'c',
 	flag_coef_mat = 'k',	//coefficiente di forza di taglio specifica per materiale
-	flag_feedrate_generale = 'f',
+	flag_feedrate_per_tagliente = 'f',
 	flag_rpm = 'r',
 	flag_feedspeed = 'a',
 };
@@ -37,7 +37,6 @@ enum indici {
 	i_coef_mat,
 	//calcolabili e definibili
 	i_cutspeed,
-	i_feedrate_generale,
 	//solo calcolabili
 	i_feedrate_per_tagliente,
     i_spessore_truciolo,
@@ -58,7 +57,6 @@ struct voci_menu {
 static void calcola_rpm_da_feedspeed(struct voci_menu  *f_param);
 static void calcola_rpm_da_cutspeed(struct voci_menu  *f_param);
 static void calcola_feedspeed(struct voci_menu *f_param);
-static void calcola_feedrate_generale(struct voci_menu *f_param);
 static void calcola_feedrate_per_tagliente(struct voci_menu *f_param);
 static void calcola_cutspeed(struct voci_menu *f_param);
 static void calcola_potenza_richiesta(struct voci_menu *f_param);
@@ -95,7 +93,7 @@ int main()
 				param1[indice_voce_menu].valore = conv_num(valore_letterale, len_str);
                 controllo_valori_minimi(param1);
 				cascata_dipendenze(param1, indice_voce_menu);
-				if (indice_voce_menu == i_feedrate_generale) {
+				if (indice_voce_menu == i_feedrate_per_tagliente) {
 					switch (scelta_dipendenza(param1, i_rpm, i_feedspeed)) {
 					case flag_rpm:
 						calcola_rpm_da_feedspeed(param1);
@@ -117,7 +115,7 @@ int main()
 
 static void calcola_rpm_da_feedspeed(struct voci_menu  *f_param)
 {
-	f_param[i_rpm].valore = (f_param[i_feedspeed].valore * 1000) / f_param[i_feedrate_generale].valore;
+	f_param[i_rpm].valore = (f_param[i_feedspeed].valore * 1000) / (f_param[i_feedrate_per_tagliente].valore * f_param[i_ntagl].valore);
     controllo_valori_minimi(f_param);
 }
 
@@ -129,18 +127,12 @@ static void calcola_rpm_da_cutspeed(struct voci_menu  *f_param)
 
 static void calcola_feedspeed(struct voci_menu *f_param)
 {
-	f_param[i_feedspeed].valore = f_param[i_feedrate_generale].valore * 0.001 * f_param[i_rpm].valore ;
+	f_param[i_feedspeed].valore = f_param[i_feedrate_per_tagliente].valore * f_param[i_ntagl].valore * 0.001 * f_param[i_rpm].valore ;
     controllo_valori_minimi(f_param);
 }
-static void calcola_feedrate_generale(struct voci_menu *f_param)
-{
-	f_param[i_feedrate_generale].valore = (f_param[i_feedspeed].valore * 1000) / f_param[i_rpm].valore;
-    controllo_valori_minimi(f_param);
-}
-
 static void calcola_feedrate_per_tagliente(struct voci_menu *f_param)
 {
-	f_param[i_feedrate_per_tagliente].valore = f_param[i_feedrate_generale].valore / f_param[i_ntagl].valore;
+	f_param[i_feedrate_per_tagliente].valore = (f_param[i_feedspeed].valore * 1000) / (f_param[i_rpm].valore * f_param[i_ntagl].valore);
     controllo_valori_minimi(f_param);
 }
 
@@ -178,21 +170,18 @@ static void cascata_dipendenze(struct voci_menu *f_param, int val_cambiato)
 	switch (val_cambiato){
 	case i_cutspeed:
 		calcola_rpm_da_cutspeed(f_param);
-		calcola_feedrate_generale(f_param);
 		calcola_feedrate_per_tagliente(f_param);
         calcola_spessore_truciolo(f_param);
         calcola_volume_truciolo(f_param);
 		break;
 	case i_rpm:
 		calcola_cutspeed(f_param);
-		calcola_feedrate_generale(f_param);
 		calcola_feedrate_per_tagliente(f_param);
         calcola_spessore_truciolo(f_param);
         calcola_coppia_richiesta(f_param);
         calcola_volume_truciolo(f_param);
 		break;
 	case i_feedspeed:
-		calcola_feedrate_generale(f_param);
 		calcola_feedrate_per_tagliente(f_param);
         calcola_spessore_truciolo(f_param);
 		calcola_potenza_richiesta(f_param);
@@ -220,8 +209,7 @@ static void cascata_dipendenze(struct voci_menu *f_param, int val_cambiato)
 	    calcola_coppia_richiesta(f_param);
         calcola_volume_truciolo(f_param);
 		break;
-	case i_feedrate_generale:
-		calcola_feedrate_per_tagliente(f_param);
+	case i_feedrate_per_tagliente:
         calcola_spessore_truciolo(f_param);
         calcola_volume_truciolo(f_param);
 		break;
@@ -234,17 +222,27 @@ static void cascata_dipendenze(struct voci_menu *f_param, int val_cambiato)
 
 static int scelta_dipendenza(struct voci_menu *s_param, const int opz1, const int opz2)
 {
-	const int max_len = 34;
-	char stringa_troncata[max_len], scelta;
+	char stringa_troncata[MAX_STRING], scelta;
+    int lunghezza, i1;
 	do {
 		printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 		printf("2 valori dipendono dal parametro modificato, quale vuoi ricalcolare?\n");
-		strncpy(stringa_troncata, s_param[opz1].dicitura_menu, max_len -1);
-		stringa_troncata[max_len - 1] = '\0';
+        for(i1 = 0; i1 < MAX_STRING; i1++) {
+            if (s_param[opz1].dicitura_menu[i1] == ':') {
+                stringa_troncata[i1] = '\0';   
+                break;
+            }
+            stringa_troncata[i1] = s_param[opz1].dicitura_menu[i1];
+        }
 		printf("%s\n", stringa_troncata);
-		strncpy(stringa_troncata, s_param[opz2].dicitura_menu, max_len -1);
-		stringa_troncata[max_len - 1] = '\0';
-		printf("%s\n\n", stringa_troncata);
+        for(i1 = 0; i1 < MAX_STRING; i1++) {
+            if (s_param[opz2].dicitura_menu[i1] == ':') {
+                stringa_troncata[i1] = '\0';   
+                break;
+            }
+            stringa_troncata[i1] = s_param[opz2].dicitura_menu[i1];
+        }
+		printf("%s\n", stringa_troncata);
 		scelta = getchar();
 		if ((scelta != '\n') && (scelta != EOF)) {
 			while ((getchar() != '\n') && (getchar() != EOF)) {
@@ -267,7 +265,7 @@ static void inizializza(struct voci_menu *iniz_param)
 	iniz_param[i_profondita].flag = (char)flag_profondita;
 	iniz_param[i_cutspeed].flag = (char)flag_cutspeed;
 	iniz_param[i_coef_mat].flag = (char)flag_coef_mat;
-	iniz_param[i_feedrate_generale].flag = (char)flag_feedrate_generale;
+	iniz_param[i_feedrate_per_tagliente].flag = (char)flag_feedrate_per_tagliente;
 	iniz_param[i_rpm].flag = (char)flag_rpm;
 	iniz_param[i_feedspeed].flag = (char)flag_feedspeed;
 	for (i1 = INIZIO_ARRAY; i1 < opzioni_disponibili; i1++) {
@@ -281,12 +279,11 @@ static void inizializza(struct voci_menu *iniz_param)
 	strcat(iniz_param[i_profondita].dicitura_menu,              "-             profondita' passata: %2.1f mm\n");
 	strcat(iniz_param[i_cutspeed].dicitura_menu,                "-              velocita' rotativa: %1.2f m/min\n\n");
 	strcat(iniz_param[i_coef_mat].dicitura_menu,                "- Kc, resistenza specifica taglio: %2.1f Nmm^2 o MPa\n");
-	strcat(iniz_param[i_feedrate_generale].dicitura_menu,       "-              avanzamento x giro: %1.3f mm\n");
+	strcat(iniz_param[i_feedrate_per_tagliente].dicitura_menu,  "-  avanzamento x giro x tagliente: %1.3f mm\n");
 	strcat(iniz_param[i_rpm].dicitura_menu,                     "-                             RPM: %5.0f\n");
 	strcat(iniz_param[i_feedspeed].dicitura_menu,               "-           velocita' avanzamento: %2.1f m/min\n\n");
 	strcat(iniz_param[i_potenza_richiesta].dicitura_menu,       "-              potenza necessaria: %3.2f KW\n");
 	strcat(iniz_param[i_coppia_richiesta].dicitura_menu,        "-               coppia necessaria: %3.2f Nm\n");
-	strcat(iniz_param[i_feedrate_per_tagliente].dicitura_menu,  "-  avanzamento x giro x tagliente: %1.3f mm\n");
 	strcat(iniz_param[i_spessore_truciolo].dicitura_menu,       "-         spessore medio truciolo: %1.3f mm\n");
 	strcat(iniz_param[i_volume_truciolo].dicitura_menu,         "-                 volume truciolo: %1.3f mm^3\n");
     controllo_valori_minimi(iniz_param);
