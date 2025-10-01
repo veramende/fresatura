@@ -287,6 +287,7 @@ static void inizializza(struct voci_menu *iniz_param)
 	strcat(iniz_param[i_spessore_truciolo].dicitura_menu,       "-         spessore medio truciolo: %1.3f mm\n");
 	strcat(iniz_param[i_volume_truciolo].dicitura_menu,         "-                 volume truciolo: %1.3f mm^3\n");
     controllo_valori_minimi(iniz_param);
+    cascata_dipendenze(iniz_param, i_rpm); //innesco calcolo feedrate con valori inizializzati
 }
 
 static int controllo_primo_carattere(int cerca, struct voci_menu *cfo_param)

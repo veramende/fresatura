@@ -240,7 +240,7 @@ static int scelta_dipendenza(struct voci_menu *s_param, const int opz1, const in
                 stringa_troncata[i1] = '\0';   
                 break;
             }
-            stringa_troncata[i1] = s_param[opz1].dicitura_menu[i1];
+            stringa_troncata[i1] = s_param[opz2].dicitura_menu[i1];
         }
 		printf("%s\n", stringa_troncata);
 		scelta = getchar();
